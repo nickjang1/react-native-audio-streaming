@@ -1,5 +1,6 @@
-#import "RCTBridgeModule.h"
-#import "RCTEventDispatcher.h"
+
+#import <React/RCTBridgeModule.h>
+#import <React/RCTEventDispatcher.h>
 
 #import "ReactNativeAudioStreaming.h"
 
