@@ -1,7 +1,5 @@
 package com.audioStreaming;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -17,10 +15,9 @@ import android.media.MediaPlayer.OnPreparedListener;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -39,7 +36,7 @@ public class Signal extends Service implements OnErrorListener,
     // Notification
     private Class<?> clsActivity;
     private static final int NOTIFY_ME_ID = 696969;
-    private Notification.Builder notifyBuilder;
+    private NotificationCompat.Builder notifyBuilder;
     private NotificationManager notifyManager = null;
     public static RemoteViews remoteViews;
     private MultiPlayer aacPlayer;
@@ -169,7 +166,7 @@ public class Signal extends Service implements OnErrorListener,
 
     public void showNotification() {
         remoteViews = new RemoteViews(context.getPackageName(), R.layout.streaming_notification_player);
-        notifyBuilder = new Notification.Builder(this.context)
+        notifyBuilder = new NotificationCompat.Builder(this.context)
                 .setSmallIcon(android.R.drawable.ic_lock_silent_mode_off) // TODO Use app icon instead
                 .setContentText("")
                 .setOngoing(true)
@@ -189,20 +186,8 @@ public class Signal extends Service implements OnErrorListener,
         notifyBuilder.setContentIntent(resultPendingIntent);
         remoteViews.setOnClickPendingIntent(R.id.btn_streaming_notification_play, makePendingIntent(BROADCAST_PLAYBACK_PLAY));
         remoteViews.setOnClickPendingIntent(R.id.btn_streaming_notification_stop, makePendingIntent(BROADCAST_EXIT));
-        notifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-    
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel =
-                    new NotificationChannel("com.audioStreaming", "Audio Streaming",
-                            NotificationManager.IMPORTANCE_HIGH);
-            if (notifyManager != null) {
-                notifyManager.createNotificationChannel(channel);
-            }
 
-            notifyBuilder.setChannelId("com.audioStreaming");
-            notifyBuilder.setOnlyAlertOnce(true);
-            
-        }
+        notifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notifyManager.notify(NOTIFY_ME_ID, notifyBuilder.build());
     }
 
@@ -308,6 +293,11 @@ public class Signal extends Service implements OnErrorListener,
     @Override
     public void playerStarted() {
         //  TODO
+        if (notifyBuilder != null) {
+            remoteViews.setImageViewResource(R.id.btn_streaming_notification_play, android.R.drawable.ic_media_pause);
+            notifyBuilder.setContent(remoteViews);
+            notifyManager.notify(NOTIFY_ME_ID, notifyBuilder.build());
+        }
     }
 
     @Override
@@ -345,8 +335,9 @@ public class Signal extends Service implements OnErrorListener,
         metaIntent.putExtra("value", value);
         sendBroadcast(metaIntent);
 
-        if (key != null && key.equals("StreamTitle") && remoteViews != null && value != null) {
-            remoteViews.setTextViewText(R.id.song_name_notification, value);
+        if (key != null && key.equals("StreamTitle")) {
+            // remoteViews.setTextViewText(R.id.song_name_notification, value);
+            remoteViews.setTextViewText(R.id.song_name_notification, "Radio Mundo");
             notifyBuilder.setContent(remoteViews);
             notifyManager.notify(NOTIFY_ME_ID, notifyBuilder.build());
         }
@@ -362,8 +353,12 @@ public class Signal extends Service implements OnErrorListener,
         this.isPlaying = false;
         this.isPreparingStarted = false;
         sendBroadcast(new Intent(Mode.STOPPED));
+
         //  TODO
+        if (notifyBuilder != null) {
+            remoteViews.setImageViewResource(R.id.btn_streaming_notification_play, android.R.drawable.ic_media_play);
+            notifyBuilder.setContent(remoteViews);
+            notifyManager.notify(NOTIFY_ME_ID, notifyBuilder.build());
+        }
     }
-
-
 }
