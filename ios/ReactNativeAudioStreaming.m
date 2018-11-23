@@ -1,5 +1,5 @@
-#import <React/RCTBridgeModule.h>
-#import <React/RCTEventDispatcher.h>
+#import "RCTBridgeModule.h"
+#import "RCTEventDispatcher.h"
 
 #import "ReactNativeAudioStreaming.h"
 
@@ -216,12 +216,17 @@ RCT_EXPORT_METHOD(getStatus: (RCTResponseSenderBlock) callback)
 - (void)audioPlayer:(STKAudioPlayer *)audioPlayer didReadStreamMetadata:(NSDictionary *)dictionary {
    NSLog(@"AudioPlayer SONG NAME  %@", dictionary[@"StreamTitle"]);
    
-   self.currentSong = dictionary[@"StreamTitle"] ? dictionary[@"StreamTitle"] : @"";
-   [self.bridge.eventDispatcher sendDeviceEventWithName:@"AudioBridgeEvent" body:@{
-                                                                                   @"status": @"METADATA_UPDATED",
-                                                                                   @"key": @"StreamTitle",
-                                                                                   @"value": self.currentSong
-                                                                                   }];
+  //  self.currentSong = dictionary[@"StreamTitle"] ? dictionary[@"StreamTitle"] : @"";
+  //  [self.bridge.eventDispatcher sendDeviceEventWithName:@"AudioBridgeEvent" body:@{
+  //                                                                                  @"status": @"METADATA_UPDATED",
+  //                                                                                  @"key": @"StreamTitle",
+  //                                                                                  @"value": self.currentSong
+  //                                                                                  }];
+  [self.bridge.eventDispatcher sendDeviceEventWithName:@"AudioBridgeEvent" body:@{
+                                                                                @"status": @"METADATA_UPDATED",
+                                                                                @"key": @"StreamTitle",
+                                                                                @"value": @"Radio Mundo"
+                                                                                }];
    [self setNowPlayingInfo:true];
 }
 
@@ -444,6 +449,8 @@ RCT_EXPORT_METHOD(getStatus: (RCTResponseSenderBlock) callback)
                                       appName ? appName : @"AppName", MPMediaItemPropertyTitle,
                                       [NSNumber numberWithFloat:isPlaying ? 1.0f : 0.0], MPNowPlayingInfoPropertyPlaybackRate, nil];
       [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = nowPlayingInfo;
+   } else {
+      [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = nil;
    }
 }
 
